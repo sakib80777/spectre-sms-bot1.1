@@ -9,7 +9,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 USER_BOT_TOKEN = "9150625768:AAGFN3a8-tNGITvaaDcCFxvOhR26m6ajrpY"    
 ADMIN_BOT_TOKEN = "9021057671:AAHKv_QdjncaQISCyjPeKdIv3lDJRGCfK50"        
 
-ADMIN_ID = 6213339142                          
+ADMIN_ID = 7678850509                         
 OTP_CHANNEL_ID = -1004381508455                  
 
 # ফোর্স সাবস্ক্রাইবের জন্য চ্যানেল বা গ্রুপ (তোমার চ্যানেলের লিংক এখানে বসিয়ে দিও)
