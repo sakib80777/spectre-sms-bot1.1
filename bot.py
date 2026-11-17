@@ -1,17 +1,18 @@
 import logging
+import asyncio
 from aiogram import Bot, Dispatcher, types, executor
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # ==========================================
-# ১. কনফিগারেশন সেটিংস (এখানে তোমার টোকেনগুলো বসাও)
+# কনফিগারেশন সেটিংস (তোমার বসানো সঠিক টোকেন ও আইডি)
 # ==========================================
-USER_BOT_TOKEN = "9150625768:AAGFN3a8-tNGITvaaDcCFxvOhR26m6ajrpY"    # ক্লায়েন্ট/ইউজাররা যে বটে কাজ করবে তার টোকেন
-ADMIN_BOT_TOKEN = "9021057671:AAHKv_QdjncaQISCyjPeKdIv3lDJRGCfK50"        # তুমি যেখান থেকে কন্ট্রোল করবে সেই অ্যাডমিন বটের টোকেন
+USER_BOT_TOKEN = "9150625768:AAGFN3a8-tNGITvaaDcCFxvOhR26m6ajrpY"    
+ADMIN_BOT_TOKEN = "9021057671:AAHKv_QdjncaQISCyjPeKdIv3lDJRGCfK50"        
 
-ADMIN_ID = 6213339142                          # তোমার নিজস্ব টেলিগ্রাম ইউজার আইডি
-OTP_CHANNEL_ID =-1004381508455                  # ওটিপি চ্যানেলের আইডি
+ADMIN_ID = 6213339142                          
+OTP_CHANNEL_ID = -1004381508455                  
 
-# ফোর্স সাবস্ক্রাইবের জন্য চ্যানেল বা গ্রুপ
+# ফোর্স সাবস্ক্রাইবের জন্য চ্যানেল বা গ্রুপ (তোমার চ্যানেলের লিংক এখানে বসিয়ে দিও)
 REQUIRED_CHANNELS = [
     {"title": "📢 Spectre SMS Channel", "url": "https://t.me/your_channel"},
     {"title": "💬 Support Group", "url": "https://t.me/your_group"}
@@ -19,7 +20,7 @@ REQUIRED_CHANNELS = [
 
 logging.basicConfig(level=logging.INFO)
 
-# দুটি আলাদা বট ইনস্ট্যান্স তৈরি করা হলো
+# দুটি আলাদা বট ইনস্ট্যান্স
 user_bot = Bot(token=USER_BOT_TOKEN)
 admin_bot = Bot(token=ADMIN_BOT_TOKEN)
 
@@ -28,7 +29,7 @@ admin_dp = Dispatcher(admin_bot)
 
 
 # ==========================================
-# ২. ইউজার বট (Client Bot) ফ্লো ও হ্যান্ডলার
+# ১. ইউজার বট (Client Bot) ফ্লো ও হ্যান্ডলার
 # ==========================================
 @user_dp.message_handler(commands=['start'])
 async def user_start(message: types.Message):
@@ -39,19 +40,18 @@ async def user_start(message: types.Message):
     keyboard.add(InlineKeyboardButton("✅ Verify & Open Bot", callback_data="verify_join"))
     
     await message.reply(
-        "👋 **Spectre SMS** বটে আপনাকে স্বাগতম!\n\nবট ব্যবহার করতে হলে প্রথমে নিচের চ্যানেল ও গ্রুপগুলোতে জয়েন করুন:",
+        "👋 **Spectre SMS** বটে আপনাকে স্বাগতম!\n\nবট ব্যবহার করতে হলে প্রথমে নিচের চ্যানেল ও গ্রুপগুলোতে জয়েন করুন:",
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
 
 @user_dp.callback_query_handler(text="verify_join")
 async def user_verify(callback_query: types.CallbackQuery):
-    is_joined = True  # জয়েনিং চেক লজিক
+    is_joined = True  # জয়েনিং চেক লজিক
     
     if is_joined:
         await user_bot.answer_callback_query(callback_query.id, "✅ ভেরিফিকেশন সফল!")
         
-        # ইউজার মেনু (ক্লায়েন্টরা যা দেখবে)
         user_menu = InlineKeyboardMarkup(row_width=2)
         user_menu.add(
             InlineKeyboardButton("📱 GET NUMBER", callback_data="get_number"),
@@ -69,11 +69,11 @@ async def user_verify(callback_query: types.CallbackQuery):
             parse_mode="Markdown"
         )
     else:
-        await user_bot.answer_callback_query(callback_query.id, "❌ আপনি সব চ্যানেল বা গ্রুপে জয়েন করেননি!", show_alert=True)
+        await user_bot.answer_callback_query(callback_query.id, "❌ আপনি সব চ্যানেল বা গ্রুপে জয়েন করেননি!", show_alert=True)
 
 
 # ==========================================
-# ৩. অ্যাডমিন বট (Admin Bot) ফ্লো ও কন্ট্রোল প্যানেল
+# ২. অ্যাডমিন বট (Admin Bot) ফ্লো ও কন্ট্রোল প্যানেল
 # ==========================================
 @admin_dp.message_handler(commands=['start', 'admin'])
 async def admin_start(message: types.Message):
@@ -97,15 +97,20 @@ async def admin_start(message: types.Message):
         parse_mode="Markdown"
     )
 
-# রান করার জন্য পুলিং (উভয় বট একসাথে চলবে)
+
+# ==========================================
+# ৩. উভয় বট একসাথে রান করার ফাংশন
+# ==========================================
+async def main():
+    print("🚀 Both User Bot and Admin Bot are starting...")
+    # aiogram এর polling একসাথে রান করার আধুনিক ও নিরাপদ পদ্ধতি
+    await asyncio.gather(
+        user_dp.start_polling(),
+        admin_dp.start_polling()
+    )
+
 if __name__ == '__main__':
-    import asyncio
-    
-    loop = asyncio.get_event_loop()
-    print("Bot is running...")
-    
-    # একসাথে দুটি বট রান করার ব্যবস্থা
-    loop.create_task(executor.start_polling(user_dp, skip_updates=True))
-    loop.create_task(executor.start_polling(admin_dp, skip_updates=True))
-    
-    loop.run_forever()
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Bots stopped!")
