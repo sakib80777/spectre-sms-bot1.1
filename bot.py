@@ -114,3 +114,17 @@ if __name__ == '__main__':
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
         logging.info("Bots stopped!")
+# ================= DUAL BOT RUNNER =================
+async def start_bots():
+    print("🚀 Both User Bot and Admin Bot are starting...")
+    await asyncio.gather(
+        user_dp.start_polling(reset_webhook=True),
+        admin_dp.start_polling(reset_webhook=True)
+    )
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(start_bots())
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Bots stopped!")
