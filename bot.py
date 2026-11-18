@@ -9,15 +9,16 @@ USER_BOT_TOKEN = "9150625768:AAFfT82NdNyhQ8BRdqwkeaKTUwvnixiihBI"
 ADMIN_BOT_TOKEN = "9021057671:AAE3fAiwMlMc1Gs3gQH2uWIv_229P-lpC4A"        
 
 ADMIN_ID = 7678850509                          
-OTP_CHANNEL_ID = -1004381508455  # ওটিপি গ্রুপ বা চ্যানেল আইডি
+OTP_CHANNEL_ID = -1004381508455  # লাইভ ওটিপি গ্রুপ আইডি
 
 REQUIRED_CHANNELS = [
     {"title": "📢 Official SMS Channel", "url": "https://t.me/your_sms_channel"},
     {"title": "💬 Support & OTP Community", "url": "https://t.me/your_support_group"}
 ]
 
-# কান্ট্রি কোড, নাম এবং ফ্ল্যাগ ম্যাপিং
+# কান্ট্রি কোড, নাম এবং ফ্ল্যাগ ম্যাপিং (সুদান +249 সহ অন্যান্য দেশ)
 COUNTRY_DATA = {
+    "+249": {"name": "Sudan", "flag": "🇸🇩"},
     "+880": {"name": "Bangladesh", "flag": "🇧🇩"},
     "+95": {"name": "Myanmar", "flag": "🇲🇲"},
     "+251": {"name": "Ethiopia", "flag": "🇪🇹"},
@@ -30,7 +31,7 @@ COUNTRY_DATA = {
     "+971": {"name": "United Arab Emirates", "flag": "🇦🇪"}
 }
 
-# ডেটাবেস স্ট্রাকচার
+# উন্নত ও সুশৃঙ্খল ডেটাবেস স্ট্রাকচার
 DATABASE = {
     "facebook": {"new_create": [], "pc_clone": []},
     "instagram": {"new_create": [], "pc_clone": []},
@@ -62,30 +63,30 @@ async def user_start(message: types.Message):
     for ch in REQUIRED_CHANNELS:
         keyboard.add(InlineKeyboardButton(ch["title"], url=ch["url"]))
     
-    keyboard.add(InlineKeyboardButton("✅ Verify & Open Bot", callback_data="verify_join"))
+    keyboard.add(InlineKeyboardButton("🚀 Enter Service Hub", callback_data="verify_join"))
     await message.reply(
-        "👋 **Spectre SMS** বটে আপনাকে স্বাগতম!\n\nবট ব্যবহার করতে হলে প্রথমে নিচের চ্যানেল ও গ্রুপগুলোতে জয়েন করুন:",
+        "✨ **Welcome to Premium SMS Gateway** ✨\n\nবটটি ব্যবহার করতে প্রথমে নিচের চ্যানেল ও গ্রুপগুলোতে জয়েন করুন:",
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
 
 @user_dp.callback_query_handler(text="verify_join")
 async def user_verify(callback_query: types.CallbackQuery):
-    await user_bot.answer_callback_query(callback_query.id, "✅ ভেরিফিকেশন সফল!")
+    await user_bot.answer_callback_query(callback_query.id, "⚡ Access Granted!")
     user_menu = InlineKeyboardMarkup(row_width=2)
     user_menu.add(
         InlineKeyboardButton("📱 GET NUMBER", callback_data="user_platforms"),
-        InlineKeyboardButton("💬 OTP GROUP", url=f"https://t.me/{str(OTP_CHANNEL_ID).replace('-100', '')}"),
+        InlineKeyboardButton("💬 LIVE OTP GROUP", url=f"https://t.me/{str(OTP_CHANNEL_ID).replace('-100', '')}"),
         InlineKeyboardButton("📊 LIVE TRAFFIC", callback_data="live_traffic"),
-        InlineKeyboardButton("👤 STATUS", callback_data="user_status"),
-        InlineKeyboardButton("💰 BALANCE", callback_data="user_balance"),
-        InlineKeyboardButton("🏆 TODAY TOP", callback_data="today_top"),
+        InlineKeyboardButton("👤 MY PROFILE", callback_data="user_status"),
+        InlineKeyboardButton("💰 WALLET", callback_data="user_balance"),
+        InlineKeyboardButton("🏆 LEADERBOARD", callback_data="today_top"),
         InlineKeyboardButton("👥 REFERRAL", callback_data="user_referral"),
-        InlineKeyboardButton("🛠 SUPPORT", callback_data="support")
+        InlineKeyboardButton("🛠 HELP & SUPPORT", callback_data="support")
     )
     await user_bot.send_message(
         callback_query.from_user.id,
-        "🌐 **SERVICE CATEGORIES:**\nSelect an option below to proceed:",
+        "🌟 **PREMIUM DASHBOARD MENU:**\nআপনার প্রয়োজনীয় অপشنটি নিচে থেকে সিলেক্ট করুন:",
         reply_markup=user_menu,
         parse_mode="Markdown"
     )
@@ -99,10 +100,10 @@ async def user_platforms_menu(callback_query: types.CallbackQuery):
         InlineKeyboardButton("📘 Facebook", callback_data="usr_plat_facebook"),
         InlineKeyboardButton("📸 Instagram", callback_data="usr_plat_instagram"),
         InlineKeyboardButton("🎵 TikTok", callback_data="usr_plat_tiktok"),
-        InlineKeyboardButton("⬅️ Back to Menu", callback_data="verify_join")
+        InlineKeyboardButton("🔙 Main Menu", callback_data="verify_join")
     )
     await user_bot.edit_message_text(
-        "📱 **SELECT PLATFORM:**\nChoose the platform you need numbers for:",
+        "📂 **SELECT PLATFORM:**\nযে প্ল্যাটফর্মের জন্য নাম্বার নিতে চান তা বেছে নিন:",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         reply_markup=keyboard,
@@ -119,17 +120,17 @@ async def user_select_type(callback_query: types.CallbackQuery):
     keyboard.add(
         InlineKeyboardButton("✨ New Create", callback_data=f"usr_get_{platform}_new_create"),
         InlineKeyboardButton("💻 PC Clone", callback_data=f"usr_get_{platform}_pc_clone"),
-        InlineKeyboardButton("⬅️ Back", callback_data="user_platforms")
+        InlineKeyboardButton("🔙 Back", callback_data="user_platforms")
     )
     await user_bot.edit_message_text(
-        f"🎯 **{platform.upper()} • SELECT TYPE:**\nChoose account creation type:",
+        f"🎯 **{platform.upper()} • ACCOUNT TYPE:**\nএকাউন্ট তৈরির ধরণ সিলেক্ট করুন:",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
 
-# স্টক থেকে নাম্বার দেখানোর হ্যান্ডলার
+# স্টক ও নাম্বার দেখানোর হ্যান্ডলার (সর্বোচ্চ ২টি বা ৩টি নাম্বার এবং Change Number ও Live OTP Group বাটন সহ)
 @user_dp.callback_query_handler(lambda c: c.data and c.data.startswith('usr_get_'))
 async def user_show_stock(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
@@ -139,24 +140,34 @@ async def user_show_stock(callback_query: types.CallbackQuery):
     
     stock_list = DATABASE[platform][ntype]
     if len(stock_list) > 0:
-        response_text = f"🔥 **Available Stock ({platform.upper()} - {ntype.replace('_', ' ').title()}):**\n\n"
-        for item in stock_list[-15:]:
+        # শুধুমাত্র শেষ থেকে সর্বোচ্চ ৩টি নাম্বার দেখাবে যাতে হজবরল না হয়
+        current_batch = stock_list[-3:] 
+        response_text = f"🔥 **Live Number Feed ({platform.upper()} - {ntype.replace('_', ' ').title()}):**\n\n"
+        for item in current_batch:
             phone = item['phone']
             country = item['country']
             flag = item['flag']
-            price = item.get('price', '৳১০')
-            response_text += f"{flag} **{country}** | `📱 {phone}` | 💵 {price}\n"
-    else:
-        response_text = f"⚠️ এই মুহূর্তে {platform.upper()} ({ntype.replace('_', ' ').title()}) ক্যাটাগরিতে কোনো নাম্বার স্টক নেই।"
+            price = item.get('price', '$0.20 (৳২০)') # পয়েন্ট বা টাকার অ্যামাউন্ট
+            response_text += f"{flag} **{country}**\n`📱 {phone}`\n💵 Price: {price}\n-------------------\n"
         
-    back_kb = InlineKeyboardMarkup().add(InlineKeyboardButton("⬅️ Back", callback_data=f"usr_plat_{platform}"))
-    await user_bot.send_message(callback_query.from_user.id, response_text, reply_markup=back_kb, parse_mode="Markdown")
+        # প্রয়োজনীয় বাটনসমূহ: Change Number এবং Live OTP Group
+        action_kb = InlineKeyboardMarkup(row_width=1)
+        action_kb.add(
+            InlineKeyboardButton("🔄 Change Number", callback_data=f"usr_get_{platform}_{ntype}"),
+            InlineKeyboardButton("💬 Live OTP Group", url=f"https://t.me/{str(OTP_CHANNEL_ID).replace('-100', '')}"),
+            InlineKeyboardButton("🔙 Back to Platform", callback_data=f"usr_plat_{platform}")
+        )
+    else:
+        response_text = f"⚠️ এই মুহূর্তে {platform.upper()} ({ntype.replace('_', ' ').title()}) ক্যাটাগরিতে কোনো নাম্বার স্টক নেই। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।"
+        action_kb = InlineKeyboardMarkup().add(InlineKeyboardButton("🔙 Back", callback_data=f"usr_plat_{platform}"))
+        
+    await user_bot.send_message(callback_query.from_user.id, response_text, reply_markup=action_kb, parse_mode="Markdown")
 
 @user_dp.callback_query_handler(text="live_traffic")
 async def user_live_traffic(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
     total_stock = sum(len(DATABASE[p][t]) for p in DATABASE for t in DATABASE[p] if isinstance(DATABASE[p], dict))
-    traffic_text = f"📊 **LIVE TRAFFIC STATUS:**\n\n👥 Total Users: {len(DATABASE['users'])}\n⚡ Active Sessions: {DATABASE['active_traffic']}\n📱 Total Stock Available: {total_stock}"
+    traffic_text = f"📊 **SYSTEM LIVE TRAFFIC:**\n\n👥 Total Members: `{len(DATABASE['users'])}`\n⚡ Active Sessions: `{DATABASE['active_traffic']}`\n📱 Available Stock: `{total_stock}`"
     await user_bot.send_message(callback_query.from_user.id, traffic_text, parse_mode="Markdown")
 
 @user_dp.callback_query_handler(text="user_status")
@@ -164,7 +175,7 @@ async def user_status(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
     user_id = callback_query.from_user.id
     u_data = DATABASE["users"].get(user_id, {"balance": 0.0, "otps_found": 0})
-    profile_text = f"👤 **Your Status:**\n\n🆔 User ID: `{user_id}`\nAccount Type: Standard User\nStatus: Active ✅\n🎯 Total OTPs Found: {u_data['otps_found']}"
+    profile_text = f"👤 **USER PROFILE INFO:**\n\n🆔 Telegram ID: `{user_id}`\n🔰 Tier: Premium Member\n✅ Status: Active & Verified\n🎯 Verified OTPs: `{u_data['otps_found']}`"
     await user_bot.send_message(callback_query.from_user.id, profile_text, parse_mode="Markdown")
 
 @user_dp.callback_query_handler(text="user_balance")
@@ -172,19 +183,19 @@ async def user_balance(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
     user_id = callback_query.from_user.id
     balance = DATABASE["users"].get(user_id, {}).get("balance", 0.0)
-    await user_bot.send_message(callback_query.from_user.id, f"💰 **Your Balance:**\n৳{balance:.2f} BDT", parse_mode="Markdown")
+    await user_bot.send_message(callback_query.from_user.id, f"💰 **WALLET BALANCE:**\n\n৳{balance:.2f} BDT", parse_mode="Markdown")
 
 @user_dp.callback_query_handler(text="today_top")
 async def user_today_top(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
     sorted_users = sorted(DATABASE["users"].items(), key=lambda x: x[1]['otps_found'], reverse=True)[:5]
     
-    top_text = "🏆 **TODAY'S TOP USERS:**\n\n"
+    top_text = "🏆 **TODAY'S TOP PERFORMERS:**\n\n"
     if sorted_users and sorted_users[0][1]['otps_found'] > 0:
         for idx, (uid, data) in enumerate(sorted_users, 1):
-            top_text += f"{idx}. User ID `{uid}` — ⚡ {data['otps_found']} OTPs\n"
+            top_text += f"{idx}. User ID `{uid}` — ⚡ `{data['otps_found']}` OTPs\n"
     else:
-        top_text += "আজকে এখনও কোনো লিডারবোর্ড ডাটা নেই।"
+        top_text += "আজকের লিডারবোর্ড ডাটা এখনও আপডেট হয়নি।"
         
     await user_bot.send_message(callback_query.from_user.id, top_text, parse_mode="Markdown")
 
@@ -196,13 +207,13 @@ async def user_referral(callback_query: types.CallbackQuery):
     ref_link = f"https://t.me/{bot_info.username}?start={user_id}"
     ref_count = DATABASE["users"].get(user_id, {}).get("referrals", 0)
     
-    ref_text = f"👥 **REFERRAL SYSTEM:**\n\nআপনার রেফারেল লিংক বন্ধুদের সাথে শেয়ার করুন:\n\n🔗 Link: `{ref_link}`\n📊 Total Referred: {ref_count} users"
+    ref_text = f"👥 **REFER & EARN PROGRAM:**\n\nআপনার বন্ধু বা গ্রুপে নিচের ইউনিক লিংকটি শেয়ার করুন:\n\n🔗 Referral Link:\n`{ref_link}`\n\n📊 Total Referred: `{ref_count}` users"
     await user_bot.send_message(callback_query.from_user.id, ref_text, parse_mode="Markdown")
 
 @user_dp.callback_query_handler(text="support")
 async def user_support(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
-    await user_bot.send_message(callback_query.from_user.id, "🛠 **Support:**\nযেকোনো প্রয়োজনে আমাদের সাপোর্ট গ্রুপে যোগাযোগ করুন। স্টার্ট মেনুতে লিংক দেওয়া আছে।", parse_mode="Markdown")
+    await user_bot.send_message(callback_query.from_user.id, "🛠 **HELP & SUPPORT:**\nযেকোনো সমস্যায় আমাদের অফিশিয়াল সাপোর্ট গ্রুপে যোগাযোগ করুন। মেনুতেই লিংক দেওয়া আছে।", parse_mode="Markdown")
 
 
 # ================= ADMIN BOT HANDLERS =================
@@ -216,12 +227,12 @@ async def admin_start(message: types.Message):
     admin_keyboard.add(
         InlineKeyboardButton("📥 ADD NUMBERS", callback_data="adm_add_num"),
         InlineKeyboardButton("📈 STATISTICS", callback_data="adm_traffic"),
-        InlineKeyboardButton("👤 USERS", callback_data="adm_users"),
-        InlineKeyboardButton("⚙️ SETTINGS", callback_data="adm_settings")
+        InlineKeyboardButton("👤 USERS INFO", callback_data="adm_users"),
+        InlineKeyboardButton("⚙️ CONFIG", callback_data="adm_settings")
     )
     
     await message.reply(
-        "👑 **SPECTRE SMS • ELITE ADMIN PANEL**\n\nWelcome back, Boss! Choose an option to manage:",
+        "👑 **PREMIUM • MASTER ADMIN CONTROL PANEL**\n\nস্বাগতম বস! আপনার ম্যানেজমেন্ট অপশন বেছে নিন:",
         reply_markup=admin_keyboard,
         parse_mode="Markdown"
     )
@@ -234,10 +245,10 @@ async def admin_add_numbers_menu(callback_query: types.CallbackQuery):
         InlineKeyboardButton("📘 Facebook", callback_data="adm_plat_facebook"),
         InlineKeyboardButton("📸 Instagram", callback_data="adm_plat_instagram"),
         InlineKeyboardButton("🎵 TikTok", callback_data="adm_plat_tiktok"),
-        InlineKeyboardButton("⬅️ Main Menu", callback_data="adm_main")
+        InlineKeyboardButton("🔙 Main Menu", callback_data="adm_main")
     )
     await admin_bot.edit_message_text(
-        "📥 **ADD NUMBERS - SELECT PLATFORM:**\nChoose platform to upload numbers:",
+        "📥 **UPLOAD NUMBERS - SELECT PLATFORM:**\nকোন প্ল্যাটফর্মে নাম্বার যোগ করতে চান?",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         reply_markup=keyboard,
@@ -253,10 +264,10 @@ async def admin_select_type(callback_query: types.CallbackQuery):
     keyboard.add(
         InlineKeyboardButton("✨ New Create", callback_data=f"adm_type_{platform}_new_create"),
         InlineKeyboardButton("💻 PC Clone", callback_data=f"adm_type_{platform}_pc_clone"),
-        InlineKeyboardButton("⬅️ Back", callback_data="adm_add_num")
+        InlineKeyboardButton("🔙 Back", callback_data="adm_add_num")
     )
     await admin_bot.edit_message_text(
-        f"🎯 **{platform.upper()} • SELECT TYPE:**\nChoose upload type:",
+        f"🎯 **{platform.upper()} • SELECT CATEGORY:**\nউপার্জন বা আপলোড ক্যাটাগরি সিলেক্ট করুন:",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         reply_markup=keyboard,
@@ -274,7 +285,7 @@ async def admin_prompt_for_numbers(callback_query: types.CallbackQuery):
     
     await admin_bot.send_message(
         callback_query.from_user.id,
-        f"📥 **UPLOADING TO {platform.upper()} ({ntype.replace('_', ' ').title()})**\n\nদয়া করে আপনার নাম্বারগুলোর লিস্ট এখানে **পেস্ট (Paste) করে পাঠিয়ে দিন**।",
+        f"📥 **UPLOADING TO {platform.upper()} ({ntype.replace('_', ' ').title()})**\n\nদয়া করে আপনার নাম্বারগুলোর লিস্ট এখানে **পেস্ট (Paste) করে পাঠিয়ে দিন**। বট অটোমেটিক কান্ট্রি কোড ও পতাকা ডিটেক্ট করে নেবে।",
         parse_mode="Markdown"
     )
 
@@ -311,7 +322,7 @@ async def process_admin_number_upload(message: types.Message):
             "phone": cleaned_num,
             "country": detected_country,
             "flag": detected_flag,
-            "price": "৳১০"
+            "price": "$0.20 (৳২০)" # পয়েন্ট/ডলার ও টাকার অ্যামাউন্ট সেট করা হলো
         })
         added_count += 1
         detected_countries_summary.add(f"{detected_flag} {detected_country}")
@@ -324,7 +335,7 @@ async def process_admin_number_upload(message: types.Message):
         f"🎉 **কনগ্রাচুলেশনস! আপনার ফাইল বা নাম্বারগুলো সফলভাবে রিসিভ হয়েছে।**\n\n"
         f"📂 Platform: `{platform.upper()}`\n"
         f"⚙️ Type: `{ntype.replace('_', ' ').title()}`\n"
-        f"🌍 Detected Country/Countries: {countries_str}\n"
+        f"🌍 Detected Country: {countries_str}\n"
         f"📥 Total Numbers Added: `{added_count}`\n\n"
         f"✅ নাম্বারগুলো সফলভাবে মেইন বটে অ্যাড করে দেওয়া হয়েছে, এখন ইউজাররা সেখান থেকে দেখতে পাবে!",
         parse_mode="Markdown"
@@ -334,17 +345,17 @@ async def process_admin_number_upload(message: types.Message):
 async def admin_traffic(callback_query: types.CallbackQuery):
     await admin_bot.answer_callback_query(callback_query.id)
     total_stock = sum(len(DATABASE[p][t]) for p in DATABASE for t in DATABASE[p] if isinstance(DATABASE[p], dict))
-    await admin_bot.send_message(callback_query.from_user.id, f"📈 **Statistics:**\nTotal Stock: {total_stock}\nActive Users: {len(DATABASE['users'])}", parse_mode="Markdown")
+    await admin_bot.send_message(callback_query.from_user.id, f"📈 **Live Analytics:**\nTotal Stock: `{total_stock}`\nRegistered Users: `{len(DATABASE['users'])}`", parse_mode="Markdown")
 
 @admin_dp.callback_query_handler(text="adm_users")
 async def admin_users(callback_query: types.CallbackQuery):
     await admin_bot.answer_callback_query(callback_query.id)
-    await admin_bot.send_message(callback_query.from_user.id, f"👤 **User Management:**\nTotal registered: {len(DATABASE['users'])}", parse_mode="Markdown")
+    await admin_bot.send_message(callback_query.from_user.id, f"👤 **User Management:**\nTotal Database Users: `{len(DATABASE['users'])}`", parse_mode="Markdown")
 
 @admin_dp.callback_query_handler(text="adm_settings")
 async def admin_settings(callback_query: types.CallbackQuery):
     await admin_bot.answer_callback_query(callback_query.id)
-    await admin_bot.send_message(callback_query.from_user.id, "⚙️ **Settings:**\nSystem is fully online and automated.", parse_mode="Markdown")
+    await admin_bot.send_message(callback_query.from_user.id, "⚙️ **System Configuration:**\nAll services are active and running stably.", parse_mode="Markdown")
 
 @admin_dp.callback_query_handler(text="adm_main")
 async def admin_main_menu(callback_query: types.CallbackQuery):
@@ -353,11 +364,11 @@ async def admin_main_menu(callback_query: types.CallbackQuery):
     admin_keyboard.add(
         InlineKeyboardButton("📥 ADD NUMBERS", callback_data="adm_add_num"),
         InlineKeyboardButton("📈 STATISTICS", callback_data="adm_traffic"),
-        InlineKeyboardButton("👤 USERS", callback_data="adm_users"),
-        InlineKeyboardButton("⚙️ SETTINGS", callback_data="adm_settings")
+        InlineKeyboardButton("👤 USERS INFO", callback_data="adm_users"),
+        InlineKeyboardButton("⚙️ CONFIG", callback_data="adm_settings")
     )
     await admin_bot.edit_message_text(
-        "👑 **SPECTRE SMS • ELITE ADMIN PANEL**",
+        "👑 **PREMIUM • MASTER ADMIN CONTROL PANEL**",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         reply_markup=admin_keyboard,
@@ -365,9 +376,9 @@ async def admin_main_menu(callback_query: types.CallbackQuery):
     )
 
 
-# ================= DUAL BOT RUNNER =================
+# ================= DUAL BOT RUNNER (24/7) =================
 async def start_bots():
-    print("🚀 Both User Bot and Admin Bot are running 24/7 smoothly...")
+    print("🚀 Premium User Bot and Admin Bot are running successfully 24/7...")
     await asyncio.gather(
         user_dp.start_polling(reset_webhook=True),
         admin_dp.start_polling(reset_webhook=True)
