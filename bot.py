@@ -31,7 +31,7 @@ COUNTRY_DATA = {
     "+971": {"name": "United Arab Emirates", "flag": "🇦🇪"}
 }
 
-# উন্নত ও সুশৃঙ্খল ডেটাবেস স্ট্রাকচার
+# ডেটাবেস স্ট্রাকচার
 DATABASE = {
     "facebook": {"new_create": [], "pc_clone": []},
     "instagram": {"new_create": [], "pc_clone": []},
@@ -86,12 +86,11 @@ async def user_verify(callback_query: types.CallbackQuery):
     )
     await user_bot.send_message(
         callback_query.from_user.id,
-        "🌟 **PREMIUM DASHBOARD MENU:**\nআপনার প্রয়োজনীয় অপشنটি নিচে থেকে সিলেক্ট করুন:",
+        "🌟 **DASHBOARD MENU:**\nআপনার প্রয়োজনীয় অপশনটি নিচে থেকে সিলেক্ট করুন:",
         reply_markup=user_menu,
         parse_mode="Markdown"
     )
 
-# প্ল্যাটফর্ম মেনু (Facebook, Instagram, TikTok)
 @user_dp.callback_query_handler(text="user_platforms")
 async def user_platforms_menu(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
@@ -110,7 +109,6 @@ async def user_platforms_menu(callback_query: types.CallbackQuery):
         parse_mode="Markdown"
     )
 
-# একাউন্ট টাইপ সিলেক্ট (New Create / PC Clone)
 @user_dp.callback_query_handler(lambda c: c.data and c.data.startswith('usr_plat_'))
 async def user_select_type(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
@@ -130,27 +128,27 @@ async def user_select_type(callback_query: types.CallbackQuery):
         parse_mode="Markdown"
     )
 
-# স্টক ও নাম্বার দেখানোর হ্যান্ডলার (সর্বোচ্চ ২টি বা ৩টি নাম্বার এবং Change Number ও Live OTP Group বাটন সহ)
+# স্টক থেকে নাম্বার দেখানোর হ্যান্ডলার এবং ডাইনামিক Change Number লজিক
 @user_dp.callback_query_handler(lambda c: c.data and c.data.startswith('usr_get_'))
 async def user_show_stock(callback_query: types.CallbackQuery):
-    await user_bot.answer_callback_query(callback_query.id)
+    await user_bot.answer_callback_query(callback_query.id, "🔄 Fetching Number...")
     parts = callback_query.data.split('_')
     platform = parts[2]
     ntype = f"{parts[3]}_{parts[4]}"
     
     stock_list = DATABASE[platform][ntype]
     if len(stock_list) > 0:
-        # শুধুমাত্র শেষ থেকে সর্বোচ্চ ৩টি নাম্বার দেখাবে যাতে হজবরল না হয়
-        current_batch = stock_list[-3:] 
+        # সর্বোচ্চ ২টি বা ৩টি নাম্বার দেখাবে, ডলার সেন্ট ফরম্যাটে (কোনো টাকার অংক ছাড়াই)
+        current_batch = stock_list[-2:] 
         response_text = f"🔥 **Live Number Feed ({platform.upper()} - {ntype.replace('_', ' ').title()}):**\n\n"
         for item in current_batch:
             phone = item['phone']
             country = item['country']
             flag = item['flag']
-            price = item.get('price', '$0.20 (৳২০)') # পয়েন্ট বা টাকার অ্যামাউন্ট
+            price = item.get('price', '$0.20') # শুধুমাত্র ডলার সেন্ট অ্যামাউন্ট
             response_text += f"{flag} **{country}**\n`📱 {phone}`\n💵 Price: {price}\n-------------------\n"
         
-        # প্রয়োজনীয় বাটনসমূহ: Change Number এবং Live OTP Group
+        # Change Number এবং Live OTP Group বাটন
         action_kb = InlineKeyboardMarkup(row_width=1)
         action_kb.add(
             InlineKeyboardButton("🔄 Change Number", callback_data=f"usr_get_{platform}_{ntype}"),
@@ -161,7 +159,21 @@ async def user_show_stock(callback_query: types.CallbackQuery):
         response_text = f"⚠️ এই মুহূর্তে {platform.upper()} ({ntype.replace('_', ' ').title()}) ক্যাটাগরিতে কোনো নাম্বার স্টক নেই। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।"
         action_kb = InlineKeyboardMarkup().add(InlineKeyboardButton("🔙 Back", callback_data=f"usr_plat_{platform}"))
         
-    await user_bot.send_message(callback_query.from_user.id, response_text, reply_markup=action_kb, parse_mode="Markdown")
+    try:
+        await user_bot.edit_message_text(
+            response_text,
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            reply_markup=action_kb,
+            parse_mode="Markdown"
+        )
+    except Exception:
+        await user_bot.send_message(
+            callback_query.from_user.id,
+            response_text,
+            reply_markup=action_kb,
+            parse_mode="Markdown"
+        )
 
 @user_dp.callback_query_handler(text="live_traffic")
 async def user_live_traffic(callback_query: types.CallbackQuery):
@@ -183,7 +195,7 @@ async def user_balance(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
     user_id = callback_query.from_user.id
     balance = DATABASE["users"].get(user_id, {}).get("balance", 0.0)
-    await user_bot.send_message(callback_query.from_user.id, f"💰 **WALLET BALANCE:**\n\n৳{balance:.2f} BDT", parse_mode="Markdown")
+    await user_bot.send_message(callback_query.from_user.id, f"💰 **WALLET BALANCE:**\n\n${balance:.2f}", parse_mode="Markdown")
 
 @user_dp.callback_query_handler(text="today_top")
 async def user_today_top(callback_query: types.CallbackQuery):
@@ -213,7 +225,7 @@ async def user_referral(callback_query: types.CallbackQuery):
 @user_dp.callback_query_handler(text="support")
 async def user_support(callback_query: types.CallbackQuery):
     await user_bot.answer_callback_query(callback_query.id)
-    await user_bot.send_message(callback_query.from_user.id, "🛠 **HELP & SUPPORT:**\nযেকোনো সমস্যায় আমাদের অফিশিয়াল সাপোর্ট গ্রুপে যোগাযোগ করুন। মেনুতেই লিংক দেওয়া আছে।", parse_mode="Markdown")
+    await user_bot.send_message(callback_query.from_user.id, f"🛠 **HELP & SUPPORT:**\nযেকোনো সমস্যায় আমাদের অফিশিয়াল সাপোর্ট গ্রুপে বা এডমিনকে মেনশন করুন: [Admin Support](https://t.me/{str(OTP_CHANNEL_ID).replace('-100', '')})", parse_mode="Markdown", disable_web_page_preview=True)
 
 
 # ================= ADMIN BOT HANDLERS =================
@@ -232,7 +244,7 @@ async def admin_start(message: types.Message):
     )
     
     await message.reply(
-        "👑 **PREMIUM • MASTER ADMIN CONTROL PANEL**\n\nস্বাগতম বস! আপনার ম্যানেজমেন্ট অপশন বেছে নিন:",
+        "👑 **EXPERT • MASTER ADMIN CONTROL PANEL**\n\nস্বাগতম বস! আপনার ম্যানেজমেন্ট অপশন বেছে নিন:",
         reply_markup=admin_keyboard,
         parse_mode="Markdown"
     )
@@ -322,7 +334,7 @@ async def process_admin_number_upload(message: types.Message):
             "phone": cleaned_num,
             "country": detected_country,
             "flag": detected_flag,
-            "price": "$0.20 (৳২০)" # পয়েন্ট/ডলার ও টাকার অ্যামাউন্ট সেট করা হলো
+            "price": "$0.20" # শুধুমাত্র ডলার সেন্ট অ্যামাউন্ট
         })
         added_count += 1
         detected_countries_summary.add(f"{detected_flag} {detected_country}")
@@ -368,7 +380,7 @@ async def admin_main_menu(callback_query: types.CallbackQuery):
         InlineKeyboardButton("⚙️ CONFIG", callback_data="adm_settings")
     )
     await admin_bot.edit_message_text(
-        "👑 **PREMIUM • MASTER ADMIN CONTROL PANEL**",
+        "👑 **EXPERT • MASTER ADMIN CONTROL PANEL**",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         reply_markup=admin_keyboard,
@@ -378,7 +390,7 @@ async def admin_main_menu(callback_query: types.CallbackQuery):
 
 # ================= DUAL BOT RUNNER (24/7) =================
 async def start_bots():
-    print("🚀 Premium User Bot and Admin Bot are running successfully 24/7...")
+    print("🚀 Expert User Bot and Admin Bot are running successfully 24/7 on Railway...")
     await asyncio.gather(
         user_dp.start_polling(reset_webhook=True),
         admin_dp.start_polling(reset_webhook=True)
